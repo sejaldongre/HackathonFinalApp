@@ -23,7 +23,8 @@ def save_json(path, data):
 
 # ---------- Firebase Initialization ----------
 if not firebase_admin._apps:
-    cred = credentials.Certificate("credentials.json")
+    key_dict = json.loads(st.secrets["FIREBASE_KEY"])
+    cred = credentials.Certificate(key_dict)
     firebase_admin.initialize_app(cred)
 db = firestore.client()
 
