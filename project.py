@@ -4,12 +4,12 @@ import json
 import firebase_admin
 from firebase_admin import credentials, firestore
 
-# ---------- FILE PATHS ----------
+
 DATA_DIR = "data"
 os.makedirs(DATA_DIR, exist_ok=True)
 PROBLEM_FILE = os.path.join(DATA_DIR, "problems.json")
 
-# ---------- JSON Helpers ----------
+
 def load_json(path):
     try:
         with open(path, "r") as f:
@@ -21,22 +21,20 @@ def save_json(path, data):
     with open(path, "w") as f:
         json.dump(data, f, indent=2)
 
-# ---------- Firebase Initialization ----------
 if not firebase_admin._apps:
     key_dict = json.loads(st.secrets["FIREBASE_KEY"])
     cred = credentials.Certificate(key_dict)
     firebase_admin.initialize_app(cred)
 db = firestore.client()
 
-# ---------- Password ----------
+
 AUTHOR_PASSWORD = "author@123"
 
-# ---------- Home Page ----------
-def home(user_is_author=False):
-    st.title("🌟 HackaAIverse - A one day Hackathon for Students")
 
-    # View Problem Statements (JSON)
-    st.header("📌 Problem Statements (from JSON)")
+def home(user_is_author=False):
+    st.title(" HackaAIverse - A one day Hackathon for Students")
+
+    st.header(" Problem Statements (from JSON)")
     problems = load_json(PROBLEM_FILE)
     if not problems:
         st.info("No problem statements available yet.")
@@ -45,19 +43,17 @@ def home(user_is_author=False):
             st.markdown(f"**{i+1}. {p['title']}**")
             st.write(p["description"])
 
-    # Author Only: Add Problem (JSON)
     if user_is_author:
-        st.header("➕ Add Problem Statement (JSON)")
+        st.header(" Add Problem Statement (JSON)")
         with st.form("add_problem_json"):
             title = st.text_input("Title")
             desc = st.text_area("Description")
             if st.form_submit_button("Add Problem"):
                 problems.append({"title": title, "description": desc})
                 save_json(PROBLEM_FILE, problems)
-                st.success("✅ Problem added to JSON!")
+                st.success(" Problem added to JSON!")
 
-    # Register Team (Firebase)
-    st.header("🧑‍💻 Register Team")
+    st.header(" Register Team")
     with st.form("register_team"):
         team_name = st.text_input("Team Name")
         members = st.text_area("Members")
@@ -68,10 +64,10 @@ def home(user_is_author=False):
                 "members": members,
                 "email": email
             })
-            st.success("✅ Team registered!")
+            st.success(" Team registered!")
 
-    # Submit Project Link (Firebase)
-    st.header("🔗 Submit Project Link")
+    
+    st.header(" Submit Project Link")
     with st.form("submit_project"):
         team = st.text_input("Registered Team Name")
         link = st.text_input("GitHub/Drive Project Link")
@@ -80,18 +76,18 @@ def home(user_is_author=False):
                 "team": team,
                 "project_link": link
             })
-            st.success("✅ Project link submitted!")
+            st.success(" Project link submitted!")
 
-# ---------- Judge Panel ----------
+
 def judge_panel():
-    st.title("👩‍⚖ Judge Panel (Author Only)")
+    st.title(" Judge Panel (Author Only)")
 
     password = st.text_input("Enter Author Password", type="password")
     if password != AUTHOR_PASSWORD:
-        st.warning("🔐 Access Denied")
+        st.warning(" Access Denied")
         return
 
-    st.success("✅ Access Granted")
+    st.success(" Access Granted")
 
     teams = db.collection("teams").stream()
     projects = {p.id: p.to_dict()["project_link"] for p in db.collection("projects").stream()}
@@ -99,9 +95,9 @@ def judge_panel():
     for t in teams:
         team = t.to_dict()
         st.subheader(team["team_name"])
-        st.write("📧", team["email"])
-        st.write("👥", team["members"])
-        st.write("🔗", projects.get(team["team_name"], "Not Submitted"))
+        st.write( team["email"])
+        st.write( team["members"])
+        st.write( projects.get(team["team_name"], "Not Submitted"))
 
         with st.form(f"score_{team['team_name']}"):
             usefulness = st.slider("Usefulness", 1, 10)
@@ -120,17 +116,17 @@ def judge_panel():
                         "clarity": clarity
                     }
                 })
-                st.success("✅ Score submitted!")
+                st.success(" Score submitted!")
 
-# ---------- Main Navigation ----------
-page = st.sidebar.radio("Navigate", ["🏠 Student/Author View", "👩‍⚖ Judge Panel"])
 
-if page == "🏠 Student/Author View":
+page = st.sidebar.radio("Navigate", [" Student/Author View", " Judge Panel"])
+
+if page == " Student/Author View":
     user_type = st.selectbox("Who are you?", ["Student", "Author"])
     if user_type == "Author":
         pwd = st.text_input("Enter Author Password", type="password")
         home(user_is_author=(pwd == AUTHOR_PASSWORD))
     else:
         home()
-elif page == "👩‍⚖ Judge Panel":
+elif page == " Judge Panel":
     judge_panel()
