@@ -33,7 +33,7 @@ AUTHOR_PASSWORD = "author@123"
 
 # ---------- Home Page ----------
 def home(user_is_author=False):
-    st.title("🌟 HackaAgent - Hybrid Hackathon System")
+    st.title("🌟 HackaAIverse - A one day Hackathon for Students")
 
     # View Problem Statements (JSON)
     st.header("📌 Problem Statements (from JSON)")
